@@ -129,6 +129,8 @@ class SENTReader:
 
     def SENTData(self):
         # check that data1 = Data2 if they are not equal return fault = True
+        # will check the CRC code for faults.  if fault, return = true
+        # returns status, data1, data2, crc, fault
         fault = False
         SentFrame = self.frame[:]
         #gather first 12 bits of data using nibble 1,2,3
@@ -160,7 +162,7 @@ class SENTReader:
         returnData = int(datanibble,16)
         returnData2 = int(datanibble2,16)
         #returns both Data values and if there is a FAULT
-        return (returnData, returnData2, fault)
+        return (self.status, returnData, returnData2,self.crc, fault)
 
 
 
