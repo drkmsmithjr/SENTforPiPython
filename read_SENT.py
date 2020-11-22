@@ -203,6 +203,7 @@ class SENTReader:
         
         if (InputPaddedArray[LenInput:] == crcValue):
             checkOK = True
+        print(InputPaddedArray[LenInput:])
         return checkOK
 
 if __name__ == "__main__":
