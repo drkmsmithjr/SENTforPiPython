@@ -1,8 +1,8 @@
-# Python Class for REading Single Edge Nibble Transission (SENT) using the Raspberry Pi
+# Python Class for Reading Single Edge Nibble Transission (SENT) using the Raspberry Pi
 
 This python library will read a Raspberry Pi GPIO pin connected
 
-The Short Form 8 nibble transmission is working 
+The 8 nibble transmission format is working  
 
 ## requirement
 pigpiod  library required
