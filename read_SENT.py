@@ -214,6 +214,8 @@ class SENTReader:
     def crcCheck(self, InputBitString, PolyBitString, PadValue ):
         # the input string will be a binary string all 6 nibbles of the SENT data
         # the seed value (padValue = '0101) is appended to the input string.  Do not use zeros for SENT protocal
+        #
+        #
         # this uses the SENT CRC recommended implementation.
         checkOK = False
 
