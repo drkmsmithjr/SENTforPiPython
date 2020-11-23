@@ -49,7 +49,8 @@ class SENTReader:
         self._low = 0
         # the time the output was high during the period
         self._high = 0
-        self.syncTick = 0
+        # setting initial value to 100
+        self.syncTick = 100
 
         #keep track of the periods
         self.syncWidth = 0
@@ -63,8 +64,8 @@ class SENTReader:
         self.crc = 0
 
         #initize the sent frame .  Need to use hex for data
-        self.frame = [0,0,0,'0x0','0x0','0x0','0x0','0x0','0x0',0]
-
+        #self.frame = [0,0,0,'0x0','0x0','0x0','0x0','0x0','0x0',0]
+        self.frame = [0,0,0,0,0,0,0,0,0,0]
         self.syncFound = False
         self.frameComplete = False
         self.nibble = 0
@@ -87,11 +88,13 @@ class SENTReader:
                 # not reset the self._low_tick
                 self._low_tick = tick
                 self._high = pigpio.tickDiff(self._high_tick,tick)
-                if 100*self._high/self._period > 90:
+                # sync pulse is detected by finding duty ratio. 51/56
+                if 100*self._high/self._period > 87:
                     self.syncFound = True
                     self.syncWidth = self._high
                     self.syncPeriod = self._period
-                    self.syncTick = round(self.syncPeriod/56.0,2)
+                    #self.syncTick = round(self.syncPeriod/56.0,2)
+                    self.syncTick = self.syncPeriod
                     # reset the nibble to zero
                     self.nibble = 0
         else:
@@ -107,55 +110,68 @@ class SENTReader:
                 self._high = pigpio.tickDiff(self._high_tick,tick)
                 self.nibble = self.nibble + 1
                 if self.nibble == 1:
-                    self.status = hex(int(round(self._period / self.syncTick)-12))
-                if self.nibble == 2:
-                    self.data1 =  hex(int(round(self._period / self.syncTick)-12))
-                if self.nibble == 3:
-                    self.data2 =  hex(int(round(self._period / self.syncTick)-12))
-                if self.nibble == 4:
-                    self.data3 =  hex(int(round(self._period / self.syncTick)-12))
-                if self.nibble == 5:
-                    self.data4 =  hex(int(round(self._period / self.syncTick)-12))
-                if self.nibble == 6:
-                    self.data5 =  hex(int(round(self._period / self.syncTick)-12))
-                if self.nibble == 7:
-                    self.data6 =  hex(int(round(self._period / self.syncTick)-12))
-                if self.nibble == 8:
-                    self.crc =    hex(int(round(self._period / self.syncTick)-12))
+                    self.status = self._period
+                elif self.nibble == 2:
+                    #self.data1 =  hex(int(round(self._period / self.syncTick)-12))
+                    self.data1 = self._period
+                elif self.nibble == 3:
+                    self.data2 = self._period
+                elif self.nibble == 4:
+                    self.data3 = self._period
+                elif self.nibble == 5:
+                    self.data4 = self._period
+                elif self.nibble == 6:
+                    self.data5 = self._period
+                elif self.nibble == 7:
+                    self.data6 = self._period
+                elif self.nibble == 8:
+                    self.crc =   self._period
                     # now send all to the SENT Frame
                     self.frame = [self.syncPeriod,self.syncTick,self.status,self.data1,self.data2,self.data3,self.data4,self.data5,self.data6,self.crc]
                     self.syncFound = False
+                    self.nibble = 0
 
+    def ConvertData(self,tickdata):
+        if tickdata == 0:
+            t = '0x0'
+        else:
+            t = hex(int(round(tickdata / self.tick())-12))
+        return t
 
     def SENTData(self):
         # check that data1 = Data2 if they are not equal return fault = True
         fault = False
         SentFrame = self.frame[:]
         #gather first 12 bits of data using nibble 1,2,3
+        # convert SentFrame to HEX Format
+        for x in range (3,9):
+            SentFrame[x] = self.ConvertData(SentFrame[x])
+        SentFrame[1] = round(SentFrame[1]/56.0,2)
+        #print (SentFrame)
+
+        #print (self.frame)
         datanibble = '0x'
         datanibble2 = '0x'
         for x in range (3,6):
-            datanibble = datanibble + str((self.frame[x]))[2:]
+            datanibble  = datanibble  + str((SentFrame[x]))[2:]
             #datanibble = datanibble + str((self.frame[x]))
         for x in range (6,9):
-            datanibble2 = datanibble2 + str((self.frame[x]))[2:]
+            datanibble2 = datanibble2 + str((SentFrame[x]))[2:]
             #datanibble2 = datanibble2 + str((self.frame[x]))
         # if using SENT mode 0, then data nibbles should be equal
         if self.SENTMode == 0 :
             if datanibble != datanibble2:
                 fault = True
         # also need section to check the CRC code in this format
-
+        #print (SentFrame)
         # converter to decimnal
         returnData = int(datanibble,16)
         returnData2 = int(datanibble2,16)
         #returns both Data values and if there is a FAULT
         return (returnData, returnData2, fault)
 
-
-
     def tick(self):
-        return self.syncTick
+        return round(self.syncTick/56.0,2)
 
     def crcNibble(self):
         return self.crc
@@ -182,7 +198,7 @@ if __name__ == "__main__":
     import read_SENT
 
     SENT_GPIO = 18
-    RUN_TIME = 60.0
+    RUN_TIME = 6000000000.0
     SAMPLE_TIME = 0.1
 
     pi = pigpio.pi()
