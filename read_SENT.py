@@ -140,6 +140,8 @@ class SENTReader:
 
     def SENTData(self):
         # check that data1 = Data2 if they are not equal return fault = True
+        # will check the CRC code for faults.  if fault, return = true
+        # returns status, data1, data2, crc, fault
         fault = False
         SentFrame = self.frame[:]
         #gather first 12 bits of data using nibble 1,2,3
@@ -163,12 +165,21 @@ class SENTReader:
             if datanibble != datanibble2:
                 fault = True
         # also need section to check the CRC code in this format
-        #print (SentFrame)
+
+        # converting the datanibble values to a binary bit string.
+        # remove the first two characters.  Not needed for crcCheck
+        InputBitString = bin(int((datanibble + datanibble2),16))[2:]
+        # converting Crcvalue to bin
+        crcBitValue = bin(int(self.crc,16))
+        #checking the crcValue
+        if self.crcCheck(InputBitString,'0101',crcBitValue) == False:
+            fault = True
+
         # converter to decimnal
         returnData = int(datanibble,16)
         returnData2 = int(datanibble2,16)
         #returns both Data values and if there is a FAULT
-        return (returnData, returnData2, fault)
+        return (self.status, returnData, returnData2,self.crc, fault)
 
     def tick(self):
         return round(self.syncTick/56.0,2)
@@ -190,6 +201,27 @@ class SENTReader:
 
     def cancel(self):
         self._cb.cancel()
+
+    def crcCheck(self, InputBitString, PolyBitStream, PadValue ):
+        # the input string will be a binary string all 6 nibbles of the SENT data
+        # the seed value (padValue) is appended to the input string.  Do not use zeros for SENT protocal
+        # this uses the SENT CRC recommended implementation.
+        checkOK = False
+
+        LenPolyBitStream = len(PolyBitStream)
+        PolyBitStream = PolyBitStream.lstrip('0')
+        #print(PolyBitStream)
+        LenInput = len(InputBitString)
+        InputPaddedArray = list(InputBitString + PadValue)
+        while '1' in InputPaddedArray[:LenInput]:
+            cur_shift = InputPaddedArray.index('1')
+            for i in range(len(PolyBitStream)):
+            InputPaddedArray[cur_shift + i] = str(int(PolyBitStream[i] != InputPaddedArray[cur_shift + i]))
+
+        if (InputPaddedArray[LenInput:] == crcValue):
+            checkOK = True
+        print(InputPaddedArray[LenInput:])
+        return checkOK
 
 if __name__ == "__main__":
 
