@@ -5,7 +5,8 @@ A full description of this Python script is described at [www.surfncircuits.com]
 
 This python library will read a Raspberry Pi GPIO pin connected. Start the pigpiod daemon with one microsecond sampling to read SENT transmissions with three microsecond tick times.   
 
-## sudo pigpiod -s 1
+## To start the daemon on Raspberry Pi
+- sudo pigpiod -s 1
 
 ## SENT packet frame summary
 
@@ -23,5 +24,5 @@ This python library will read a Raspberry Pi GPIO pin connected. Start the pigpi
 ## requirements
 [pigpiod](http://abyz.me.uk/rpi/pigpio/)  library required
 
-## run the script for a signal attached to GPIO BCD 18 (pin 12)
+## To run the script for a signal attached to GPIO BCD 18 (pin 12)
 - python3 sent_READ.py
