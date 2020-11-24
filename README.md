@@ -5,9 +5,9 @@ A full description of this Python script is described at [www.surfncircuits.com]
 
 This python library will read a Raspberry Pi GPIO pin connected. Start the pigpiod daemon with one microsecond sampling to read SENT transmissions with three microsecond tick times.   
 
-##sudo pigpiod -s 1
+## sudo pigpiod -s 1
 
-##SENT packet frame summary
+## SENT packet frame summary
 
 - Sync Pulse: 56 ticks
 - 4 bit Status and Message Pulse: 17-32 ticks
