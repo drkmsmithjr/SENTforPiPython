@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
 # read_PWM.py
-# Public Domain by mark smith,   www.surfncircuits.com
+# Public Domain by mark smith,   www.surfncircuits.com 
+# blog:https://surfncircuits.com/2020/11/27/implementing-a-single-edge-nibble-transmission-sent-protocol-in-python-for-the-raspberry-pi-zero/
 
 import time
 import pigpio # http://abyz.co.uk/rpi/pigpio/python.html
@@ -79,7 +80,7 @@ class SENTReader:
         #time.sleep(0.05)
 
         #start thread to sample the SENT property
-        # this is needed fro piGPIO sample of 1us and sensing the 3us
+        # this is needed for piGPIO sample of 1us and sensing the 3us
         self.OutputSampleThread = threading.Thread(target = self.SampleCallBack)
         self.OutputSampleThread.daemon = True
         self.OutputSampleThread.start()
