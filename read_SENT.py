@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 
 # read_PWM.py
-# 2015-12-08
-# Public Domain
+# Public Domain by mark smith,   www.surfncircuits.com
 
 import time
 import pigpio # http://abyz.co.uk/rpi/pigpio/python.html
