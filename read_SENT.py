@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # read_PWM.py
-# Public Domain by mark smith,   www.surfncircuits.com 
+# Public Domain by mark smith,   www.surfncircuits.com
 # blog:https://surfncircuits.com/2020/11/27/implementing-a-single-edge-nibble-transmission-sent-protocol-in-python-for-the-raspberry-pi-zero/
 
 import time
@@ -78,12 +78,14 @@ class SENTReader:
         #self._cb = pi.callback(gpio, pigpio.EITHER_EDGE, self._cbf)
         #sleep enougth to start reading SENT
         #time.sleep(0.05)
-
+        self.ThreadStop = False
         #start thread to sample the SENT property
         # this is needed for piGPIO sample of 1us and sensing the 3us
         self.OutputSampleThread = threading.Thread(target = self.SampleCallBack)
         self.OutputSampleThread.daemon = True
         self.OutputSampleThread.start()
+
+
 
         #give time for thread to start capturing data
         time.sleep(.05)
@@ -93,7 +95,7 @@ class SENTReader:
 
      # this will run in a loop and sample the SENT path
      # this sampling is required when 1us sample rate for SENT 3us tick time
-     while True:
+     while self.ThreadStop==False:
 
         self.SampleStopped = False
         self._cb = self.pi.callback(self.gpio, pigpio.EITHER_EDGE, self._cbf)
@@ -270,7 +272,7 @@ class SENTReader:
         self._cb.cancel()
 
     def stop(self):
-        self.OutputSampleThread.stop()
+        self.ThreadStop == True
 
     def crcCheck(self, InputBitString, PolyBitString, crcValue ):
         # the input string will be a binary string all 6 nibbles of the SENT data
@@ -298,7 +300,7 @@ if __name__ == "__main__":
     import pigpio
     import read_SENT
 
-    SENT_GPIO = 18
+    SENT_GPIO = 24
     RUN_TIME = 6000000000.0
     SAMPLE_TIME = 0.1
 
